@@ -1,0 +1,48 @@
+body {
+    background-color: rgb(7, 32, 7);
+    color: white;
+}
+
+.pomodoro {
+    position: fixed;
+    left: 50%;
+    bottom: 70px;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+
+}
+
+.botones-pomodoro {
+    position: fixed;
+    left: 50%;
+    bottom: 50px;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+}
+
+.barra {
+    background-color: rgba(24, 85, 24, 0.185);
+
+    height: 25px;
+}
+
+.barra-interna {
+    background-color: rgb(8, 68, 8);
+}
+
+#texto-barra {
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    margin-bottom: 3px;
+}
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
+}
+
