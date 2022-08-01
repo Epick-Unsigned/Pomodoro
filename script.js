@@ -1,58 +1,98 @@
-const UN_SEGUNDO_INTERVAL = 100;
+//const fetch = require("node-fetch");
 
-const UN_MIN = 60;
+const UN_SEGUNDO_INTERVAL = 10;
+
+const MIN_A_SEG = 60;
 const SESION_MIN = 25 ;
 const DESCANSO_MIN = 5 ;
+const CANT_SESIONES = 4;
 
 
 
 
 //Valores por defecto para sesion
-const SEGUNDO_INICIAL = 0;
-const MINUTO_INICIAL = SESION_MIN-1;
+const SEGUNDO_INICIAL_SESION = 0;
+const MINUTO_INICIAL_SESION = SESION_MIN;
+
+const SEGUNDO_INICIAL_DESCANSO = 0;
+const MINUTO_INICIAL_DESCANSO = DESCANSO_MIN;
 
 const SESION_NO_TERMINADA = false;
 const SESION_TERMINADA = true;
 const ESTADO_SESION_INICIAL = SESION_NO_TERMINADA;
 
+const SIN_INTERVALO = null;
 
-let idIntervalo = null;
+const ESTUDIO_ACTIVO = true;
+const ESTUDIO_TERMINO = false;
+
+const DESCANSO_ACTIVO = true;
+const DESCANSO_TERMINO = false;
+
+let idIntervalo = SIN_INTERVALO;
 let terminoSesion = SESION_NO_TERMINADA;
+let contadorSesiones = CANT_SESIONES ;
 
-document.querySelector("#texto-barra").innerHTML = SESION_MIN+":0"+SEGUNDO_INICIAL;
+document.querySelector("#texto-barra").innerHTML = SESION_MIN+":0"+SEGUNDO_INICIAL_SESION;
 /**
  * Inicia estudio
  */
 function comenzarEstudio(){
-    if(!idIntervalo){
-        iniciarSesion();
+    if(!idIntervalo ){
+        iniciarSesion(SEGUNDO_INICIAL_SESION, MINUTO_INICIAL_SESION);
+        /* iniciarSesion(SEGUNDO_INICIAL_DESCANSO, MINUTO_INICIAL_DESCANSO); */
     }else{
-        console.log("imposible iniciar otra vez")
+        console.log("no es posible iniciar otra sesion");
     }
 }
 
 /**
- * Inicia una sesion pomodoro
+ * Comienza la sesion segun los valores recibidos
+ * @param {Number} segInicial del tipo de sesion
+ * @param {Number} minInicial del tipo de sesion
  */
-function iniciarSesion(){
-    let seg = SEGUNDO_INICIAL;
-    let min = MINUTO_INICIAL;
+function iniciarSesion(segInicial, minInicial){
+    let seg = segInicial;
+    let min = minInicial-1;
+    let estadoEstudio = ESTUDIO_ACTIVO;
+    let estadoDescanso = DESCANSO_TERMINO;
     console.log("iniciando sesion");
         idIntervalo = setInterval(()=>{
-            if(terminoSesion){
+            if(!contadorSesiones){
+                console.log("Termino estudio"); 
                 clearInterval(idIntervalo);
+                idIntervalo = SIN_INTERVALO;
             }else{
-                seg = obtenerSegundos(seg);
-                modificarBarraProgreso(seg,min); 
-                min = obtenerMinutos(seg, min);
+                if(terminoSesion && !estadoDescanso){
+                    console.log("estudio terminado");
+                    seg = SEGUNDO_INICIAL_DESCANSO;
+                    min = MINUTO_INICIAL_DESCANSO-1;
+                    terminoSesion = SESION_NO_TERMINADA;
+                    estadoDescanso = DESCANSO_ACTIVO;
+                    estadoEstudio = ESTUDIO_TERMINO;
+                }else if(terminoSesion && !estadoEstudio){
+                    console.log("descanso terminado");
+                    seg = SEGUNDO_INICIAL_SESION;
+                    min = MINUTO_INICIAL_SESION-1;
+                    terminoSesion = SESION_NO_TERMINADA;
+                    estadoDescanso = DESCANSO_TERMINO;
+                    estadoEstudio = ESTUDIO_ACTIVO;
+                }else{
+                    seg = obtenerSegundos(seg);
+                    modificarBarraProgreso(seg, min, minInicial); 
+                    min = obtenerMinutos(seg, min);
+                    if(terminoSesion && estadoEstudio){
+                        contadorSesiones--;
+                    }
+                }
             }
         }, UN_SEGUNDO_INTERVAL);
 }
 
-function modificarBarraProgreso(seg, min){
+function modificarBarraProgreso(seg, min, minInicial){
     // 25*60 -> 100
     // x*x -> x*x*100/25*60
-    let progresoPorcentaje = 100 - (((seg + min*60 ) * 100) / (25*60));
+    let progresoPorcentaje = 100 - (((seg + min*MIN_A_SEG ) * 100) / (minInicial*MIN_A_SEG));
     console.log(progresoPorcentaje.toString()+"%", seg ,min);
     (document.querySelector(".barra-interna")).style.width = progresoPorcentaje.toString()+"%";
     document.querySelector("#texto-barra").innerHTML = `${darFormatoTxtMin(min)}:${darFormatoTxtSegundo(seg)}`;
@@ -74,7 +114,7 @@ function obtenerSegundos(seg){
 }
 
 /**
- * Modifica el valor de minutos dependiendo del valor de segundos y la cantidad de minutos por sesion
+ * Modifica el valor de minutos dependiendo del valor de segundos
  * @param {Number} seg actuales
  * @param {Number} min actuales
  * @return  minutos correspondientes de sesion
