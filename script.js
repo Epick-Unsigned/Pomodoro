@@ -1,6 +1,6 @@
 //const fetch = require("node-fetch");
 
-const UN_SEGUNDO_INTERVAL = 10;
+const UN_SEGUNDO_INTERVAL = 1000;
 
 const MIN_A_SEG = 60;
 const SESION_MIN = 25 ;
@@ -157,3 +157,6 @@ function darFormatoTxtMin(min){
     }
     return minTxt
 }
+
+
+comenzarEstudio();
